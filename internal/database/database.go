@@ -16,6 +16,10 @@ import (
 
 type Service interface {
 	Health() map[string]string
+	Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error
+	Get(ctx context.Context, key string) (string, error)
+	Del(ctx context.Context, key string) error
+	CountByPrefix(ctx context.Context, prefix string) (int64, error)
 }
 
 type service struct {
@@ -23,10 +27,10 @@ type service struct {
 }
 
 var (
-	address  = os.Getenv("BLUEPRINT_DB_ADDRESS")
-	port     = os.Getenv("BLUEPRINT_DB_PORT")
-	password = os.Getenv("BLUEPRINT_DB_PASSWORD")
-	database = os.Getenv("BLUEPRINT_DB_DATABASE")
+	address  = os.Getenv("DB_ADDRESS")
+	port     = os.Getenv("DB_PORT")
+	password = os.Getenv("DB_PASSWORD")
+	database = os.Getenv("DB_DATABASE")
 )
 
 func New() Service {
@@ -195,4 +199,27 @@ func parseRedisInfo(info string) map[string]string {
 		}
 	}
 	return result
+}
+
+func (s *service) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error {
+	// Using Set to store a key-value pair with an expiration time
+	return s.db.Set(ctx, key, value, ttl).Err()
+}
+
+func (s *service) Get(ctx context.Context, key string) (string, error) {
+	// Using Get to retrieve the value of a key
+	return s.db.Get(ctx, key).Result()
+}
+
+func (s *service) Del(ctx context.Context, key string) error {
+	// Using Del to delete a key from Redis
+	return s.db.Del(ctx, key).Err()
+}
+
+func (s *service) CountByPrefix(ctx context.Context, prefix string) (int64, error) {
+	keys, err := s.db.Keys(ctx, prefix+"*").Result()
+	if err != nil {
+		return 0, err
+	}
+	return int64(len(keys)), nil
 }

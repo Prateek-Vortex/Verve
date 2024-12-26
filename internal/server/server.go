@@ -9,22 +9,23 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 
+	appcontext "Verve/internal/configs/appContext"
 	"Verve/internal/database"
 )
 
 type Server struct {
 	port int
-
-	db database.Service
+	db   database.Service
 }
 
 func NewServer() *http.Server {
 	port, _ := strconv.Atoi(os.Getenv("PORT"))
 	NewServer := &Server{
 		port: port,
-
-		db: database.New(),
+		db:   database.New(),
 	}
+
+	appcontext.LoadAppContext(NewServer.db)
 
 	// Declare Server config
 	server := &http.Server{

@@ -1,6 +1,8 @@
 package server
 
 import (
+	appcontext "Verve/internal/configs/appContext"
+	"Verve/internal/controller"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -21,6 +23,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 		AllowCredentials: true,
 		MaxAge:           300,
 	}))
+
+	r.Get("/api/verve/accept",controller.GetApi)
 
 	r.Get("/", s.HelloWorldHandler)
 
