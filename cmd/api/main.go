@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Verve/internal/server"
 	"context"
 	"fmt"
 	"log"
@@ -8,7 +9,6 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-	"Verve/internal/server"
 )
 
 func gracefulShutdown(apiServer *http.Server, done chan bool) {
@@ -44,6 +44,8 @@ func main() {
 
 	// Run graceful shutdown in a separate goroutine
 	go gracefulShutdown(server, done)
+
+	log.Println("Server started")
 
 	err := server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {

@@ -8,6 +8,6 @@ type VerveEntity struct {
 
 func GetEntityFromRequest(request request.VerveRequest) VerveEntity {
 	return VerveEntity{
-		Id: request.Id
+		Id: request.Id,
 	}
 }
