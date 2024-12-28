@@ -1,6 +1,50 @@
+version: "3.8"
+
 services:
-  redis_bp:
-    image: redis:7.2.4
-    restart: unless-stopped
+  # Golang application service
+  app:
+    build: .
     ports:
-      - "${BLUEPRINT_DB_PORT}:6379"
+      - "8081:8081"  # Expose port 8081 for your Go app
+    networks:
+      - mynetwork
+    environment:
+      - REDIS_HOST=redis  # Redis container name
+      - KAFKA_BROKER=kafka:9092  # Kafka broker address
+    depends_on:
+      - redis  # Ensure Redis starts before the app
+      - kafka  # Ensure Kafka starts before the app
+
+  # Redis service
+  redis:
+    image: redis:alpine
+    networks:
+      - mynetwork
+    expose:
+      - "6379"  # Expose port 6379 internally to other containers
+
+  # Apache Kafka service
+  kafka:
+    image: wurstmeister/kafka:latest
+    networks:
+      - mynetwork
+    environment:
+      KAFKA_ADVERTISED_LISTENER: INSIDE://kafka:9092  # Internal Kafka listener
+      KAFKA_LISTENER_SECURITY_PROTOCOL: PLAINTEXT
+      KAFKA_LISTENER_NAME_INSIDE: INSIDE
+      KAFKA_LISTENER_PORT: 9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    expose:
+      - "9092"  # Expose port 9092 internally to other containers
+
+  # Zookeeper service (required for Kafka)
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    networks:
+      - mynetwork
+    expose:
+      - "2181"  # Expose port 2181 for Kafka's Zookeeper
+
+networks:
+  mynetwork:
+    driver: bridge
