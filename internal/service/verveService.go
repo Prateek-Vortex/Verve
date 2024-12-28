@@ -20,12 +20,12 @@ type VerveService interface {
 
 type implVerveService struct {
 	verveRepo  repository.VerveRepository
-	restClient *restclient.RestClient
+	restClient restclient.RestClient
 	Logger     *slog.Logger
 	Event      event.Event
 }
 
-func NewImplVerveService(repository repository.VerveRepository, client *restclient.RestClient, logger *slog.Logger, event event.Event) *implVerveService {
+func NewImplVerveService(repository repository.VerveRepository, client restclient.RestClient, logger *slog.Logger, event event.Event) *implVerveService {
 	return &implVerveService{
 		verveRepo:  repository,
 		restClient: client,

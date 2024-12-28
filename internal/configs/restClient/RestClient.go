@@ -7,15 +7,22 @@ import (
 	"time"
 )
 
+type RestClient interface {
+	Get(path string) (*http.Response, error)
+	Post(path string, body interface{}) (*http.Response, error)
+	Put(path string, body interface{}) (*http.Response, error)
+	Delete(path string) (*http.Response, error)
+}
+
 // RestClient represents a simple HTTP client
-type RestClient struct {
+type RestHttpClient struct {
 	httpClient *http.Client
 	headers    map[string]string
 }
 
 // NewRestClient creates a new REST client instance
-func NewRestClient() *RestClient {
-	return &RestClient{
+func NewRestClient() RestClient {
+	return &RestHttpClient{
 		httpClient: &http.Client{
 			Timeout: time.Second * 30,
 		},
@@ -26,32 +33,32 @@ func NewRestClient() *RestClient {
 }
 
 // Get performs a GET request
-func (c *RestClient) Get(path string) (*http.Response, error) {
+func (c *RestHttpClient) Get(path string) (*http.Response, error) {
 	return c.doRequest("GET", path, nil)
 }
 
 // Post performs a POST request
-func (c *RestClient) Post(path string, body interface{}) (*http.Response, error) {
+func (c *RestHttpClient) Post(path string, body interface{}) (*http.Response, error) {
 	return c.doRequest("POST", path, body)
 }
 
 // Put performs a PUT request
-func (c *RestClient) Put(path string, body interface{}) (*http.Response, error) {
+func (c *RestHttpClient) Put(path string, body interface{}) (*http.Response, error) {
 	return c.doRequest("PUT", path, body)
 }
 
 // Delete performs a DELETE request
-func (c *RestClient) Delete(path string) (*http.Response, error) {
+func (c *RestHttpClient) Delete(path string) (*http.Response, error) {
 	return c.doRequest("DELETE", path, nil)
 }
 
 // SetHeader sets a custom header
-func (c *RestClient) SetHeader(key, value string) {
+func (c *RestHttpClient) SetHeader(key, value string) {
 	c.headers[key] = value
 }
 
 // doRequest performs the HTTP request
-func (c *RestClient) doRequest(method, path string, body interface{}) (*http.Response, error) {
+func (c *RestHttpClient) doRequest(method, path string, body interface{}) (*http.Response, error) {
 	url := path
 	var reqBody *bytes.Buffer
 

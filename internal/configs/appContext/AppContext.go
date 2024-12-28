@@ -16,7 +16,7 @@ type AppContext struct {
 	Logger          *slog.Logger
 	VerveService    service.VerveService
 	VerveRepository repository.VerveRepository
-	RestClient      *restclient.RestClient
+	RestClient      restclient.RestClient
 	Event           event.Event
 }
 
