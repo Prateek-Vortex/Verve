@@ -7,6 +7,7 @@ import (
 	"Verve/internal/model/request"
 	"Verve/internal/repository"
 	"context"
+	"fmt"
 	"log/slog"
 	"strconv"
 	"time"
@@ -92,6 +93,11 @@ func (vs *implVerveService) SendUniqueCountEveryMinute(ctx context.Context) {
 	done := make(chan bool)
 
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				vs.Logger.Error("Recovered from panic", "error", r)
+			}
+		}()
 		for {
 			select {
 			case <-ticker.C:
@@ -99,6 +105,12 @@ func (vs *implVerveService) SendUniqueCountEveryMinute(ctx context.Context) {
 				if err != nil {
 					vs.Logger.Error("Failed to get unique count", "error", err)
 					continue
+				}
+				err = vs.verveRepo.Delete(ctx)
+				if err != nil {
+					vs.Logger.Error("Failed to delete unique count", "error", err)
+					errs := fmt.Errorf("failed to delete unique count %w", err)
+					panic(errs)
 				}
 
 				vs.Event.Publish(ctx, "unique_count", strconv.FormatInt(count, 10))

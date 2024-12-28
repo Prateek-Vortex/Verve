@@ -4,7 +4,6 @@ import (
 	appcontext "Verve/internal/configs/appContext"
 	e "Verve/internal/configs/errorResponse"
 	"Verve/internal/model/request"
-	"errors"
 	"net/http"
 )
 
@@ -14,14 +13,15 @@ func GetApi(w http.ResponseWriter, r *http.Request) {
 	request, err := request.SanitizeUrlParams(r)
 
 	if err != nil {
-		e.SendError(w, http.StatusBadRequest, errors.New("Failed"))
+		e.SendResponse(w, http.StatusBadRequest, "failed")
+		return
 	}
 
 	err = appCtx.VerveService.SaveAndPost(r.Context(), *request)
 	if err != nil {
-		e.SendError(w, http.StatusInternalServerError, errors.New("Failed"))
+		e.SendResponse(w, http.StatusInternalServerError, "failed")
+		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Ok"))
+	e.SendResponse(w, http.StatusOK, "ok")
 }

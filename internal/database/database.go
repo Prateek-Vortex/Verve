@@ -20,6 +20,8 @@ type Service interface {
 	Get(ctx context.Context, key string) (string, error)
 	Del(ctx context.Context, key string) error
 	CountByPrefix(ctx context.Context, prefix string) (int64, error)
+	SAdd(ctx context.Context, key string, members ...interface{}) error
+	SCard(ctx context.Context, key string) (int64, error)
 }
 
 type service struct {
@@ -222,4 +224,12 @@ func (s *service) CountByPrefix(ctx context.Context, prefix string) (int64, erro
 		return 0, err
 	}
 	return int64(len(keys)), nil
+}
+
+func (s *service) SAdd(ctx context.Context, key string, members ...interface{}) error {
+	return s.db.SAdd(ctx, key, members...).Err()
+}
+
+func (s *service) SCard(ctx context.Context, key string) (int64, error) {
+	return s.db.SCard(ctx, key).Result()
 }
